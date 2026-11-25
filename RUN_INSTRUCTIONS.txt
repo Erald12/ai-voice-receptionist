@@ -1,0 +1,124 @@
+AI VOICE RECEPTIONIST - HOW TO RUN IT (Windows, PowerShell)
+============================================================
+
+WHAT IT DOES
+  Turns missed-call voicemails into a callback queue for staff.
+  It never answers calls or sends texts. Staff approve every draft.
+
+
+1. PREREQUISITES
+  - Python 3.10 or later:      python --version
+  - ffmpeg (needed by Whisper): ffmpeg -version
+    If missing: winget install ffmpeg, then close and reopen PowerShell.
+  - An Anthropic API key, with billing set up in the Claude Console.
+
+
+2. GET THE PROJECT
+  cd D:\PythonProject
+  git clone https://github.com/Erald12/ai-voice-receptionist.git
+  cd ai-voice-receptionist
+
+  If the folder already exists, skip the clone and just run the cd command.
+
+
+3. CREATE AND ACTIVATE THE ENVIRONMENT
+  python -m venv .venv
+  .venv\Scripts\activate
+  pip install -r requirements.txt
+
+  The prompt should show (.venv) when it is active.
+  Whisper installs PyTorch, so the first install can take several minutes.
+
+  If you use the shared environment instead:
+  ..\.venv\Scripts\activate
+
+
+4. ADD YOUR API KEY
+  copy .env.example .env
+  notepad .env
+
+  Replace your_key_here so the line reads:
+  ANTHROPIC_API_KEY=sk-ant-...
+
+  Save the file. Never commit .env to GitHub.
+
+
+5. CHECK THE CONFIG FILES
+  config\business.json       Business name, hours, services Claude may use.
+  config\urgent_terms.txt    Keywords that always escalate. Keep the list broad.
+  config\banned_phrases.txt  Words a text-back must never contain.
+
+  The sample values are fictional. Replace them with the details you are testing.
+
+
+6. ADD RECORDINGS
+  Copy voicemail recordings into:
+  incoming\audio\
+
+  Supported formats: .mp3, .wav, .m4a
+  Use unique names, for example: 2026-12-01_0930_001.mp3
+
+  Transcripts are created automatically in incoming\calls\
+
+
+7. RUN THE PIPELINE (in this order)
+  python -m src.transcribe
+  python -m src.main
+
+  src.transcribe   Creates a transcript for each new or changed recording.
+                   The first run downloads the Whisper model (a few minutes).
+  src.main         Reads the transcripts and writes the queue, run log, and state.
+
+  Example output:
+    call_001.mp3: callback
+    call_002.mp3: escalate
+    Done. 1 escalate, 1 callback, 0 missing number, 0 unchanged.
+
+
+8. READ THE QUEUE
+  notepad output\callback_queue.md
+
+  Sections:
+    1. Escalate now         Call immediately. If someone is in danger, call 911.
+    2. Callbacks to make    Confirm the number, call, then send a text only
+                            after approving the draft.
+    3. Missing number       Find the number in the phone log or CRM first.
+
+  Check the timestamp at the top. Numbers taken from recordings are marked
+  "verify before calling."
+
+
+9. TEST ACCURACY (optional)
+  Requires ground_truth\expected.json, written by hand from the scripts
+  and the audio before running the pipeline.
+
+  python -m src.score
+
+  Not needed for normal use.
+
+
+10. RUN ON A SCHEDULE (every 15 minutes)
+  schtasks /create /tn "VoiceReceptionist" /tr "D:\PythonProject\ai-voice-receptionist\run_receptionist.bat" /sc minute /mo 15
+  schtasks /run /tn "VoiceReceptionist"
+
+  Check output\run.log for errors and output\run_log.csv for each run's status.
+  The lock prevents two runs from overlapping.
+
+
+TROUBLESHOOTING
+  No module named whisper     Environment not active. Run pip install -r
+                              requirements.txt inside (.venv).
+  ffmpeg FileNotFoundError    Install ffmpeg, then reopen PowerShell.
+  401 authentication error    Key is wrong or revoked. Create a new one and
+                              check the .env line has no quotes or spaces.
+  No audio files found        Recordings are not in incoming\audio\, or the
+                              extension is not supported.
+  Skipped: another run holds  A run is still going or crashed. If nothing is
+  pipeline.lock               running, delete output\pipeline.lock.
+  Missing transcripts         Run src.transcribe first and check its output.
+
+
+IMPORTANT
+  This is a supervised prototype. Read the queue, confirm numbers before
+  calling, and approve every draft yourself. It is not connected to a phone
+  line and must not be the only route for emergency calls.
