@@ -143,17 +143,6 @@ python -m src.score
 
 It reports phone accuracy, lane accuracy, and recall for urgent keywords. An incomplete number that was flagged for staff counts as a miss for the phone check, which is intentional.
 
-**Measured results** (fill in your own):
-
-- Recordings in the answer key: ___ (date: ___)
-- Phone accuracy: ___ / ___
-- Lane accuracy: ___ / ___
-- Urgent keyword recall: ___ / ___
-- Transcription errors found: ___ (for example, "whitening" heard as "Trice Noun Tith")
-- Whisper model used: `small`
-
-Four recordings are not enough to show reliability. Treat any figure here as a test result on a small set, not as an accuracy rate.
-
 ## Known limits
 
 - **Transcription:** Whisper can drop digits, mishear words, and garble Tagalog or Taglish. A missed urgent word means the call is not escalated by keyword, so the queue depends on the transcript being right.
