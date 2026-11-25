@@ -1,0 +1,7 @@
+{
+  "business_name": "Bright Smile Dental",
+  "office_hours": "Monday to Saturday, 9:00 AM to 6:00 PM",
+  "services": ["cleanings", "fillings", "orthodontic consultations", "teeth whitening"],
+  "callback_policy": "Staff return calls during office hours. Appointment times and prices are confirmed only by staff.",
+  "emergency_message": "If this is an emergency, call 911 or go to the nearest emergency room."
+}

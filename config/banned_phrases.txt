@@ -1,0 +1,12 @@
+// A text-back must never promise, confirm, or quote anything staff must confirm.
+confirmed
+booked
+guarantee
+guaranteed
+price
+cost
+free
+$
+₱
+diagnos
+treatment
